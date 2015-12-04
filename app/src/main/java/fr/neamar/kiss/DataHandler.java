@@ -1,13 +1,10 @@
 package fr.neamar.kiss;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.preference.PreferenceManager;
 
 import java.util.ArrayList;
@@ -55,11 +52,8 @@ public class DataHandler extends BroadcastReceiver {
         appProvider = new AppProvider(context);
         providers.add(appProvider);
 
-        if (prefs.getBoolean("enable-contacts", true)) {
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context.checkSelfPermission((Activity) context, android.Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_DENIED)
-                
-            }
-
+        // Contact are disabled by default, since we need an explicit permission
+        if (prefs.getBoolean("enable-contacts", true) && prefs.getBoolean("has-contact-permission", false)) {
             contactProvider = new ContactProvider(context);
             providers.add(contactProvider);
         } else {

@@ -1,5 +1,6 @@
 package fr.neamar.kiss;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
@@ -11,6 +12,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -54,6 +56,9 @@ public class MainActivity extends ListActivity implements QueryInterface {
     public static final String START_LOAD = "fr.neamar.summon.START_LOAD";
     public static final String LOAD_OVER = "fr.neamar.summon.LOAD_OVER";
     public static final String FULL_LOAD_OVER = "fr.neamar.summon.FULL_LOAD_OVER";
+
+    public static final int PERMISSION_CONTACT = 0;
+    public static final int PERMISSION_PHONE = 1;
 
     /**
      * IDS for the favorites buttons
@@ -145,6 +150,10 @@ public class MainActivity extends ListActivity implements QueryInterface {
         this.registerReceiver(mReceiver, intentFilterBis);
         this.registerReceiver(mReceiver, intentFilterTer);
         KissApplication.initDataHandler(this);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(android.Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_DENIED) {
+            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, PERMISSION_CONTACT);
+        }
 
         // Initialize preferences
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
@@ -270,6 +279,16 @@ public class MainActivity extends ListActivity implements QueryInterface {
                 findViewById(id).setBackgroundResource(outValue.resourceId);
             }
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if(requestCode == PERMISSION_CONTACT && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("has-contact-permission", true).apply();
+            KissApplication.resetDataHandler(this);
+        }
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override
