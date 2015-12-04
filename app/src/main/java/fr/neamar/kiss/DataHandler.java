@@ -1,15 +1,19 @@
 package fr.neamar.kiss;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.preference.PreferenceManager;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+
 import fr.neamar.kiss.dataprovider.AliasProvider;
 import fr.neamar.kiss.dataprovider.AppProvider;
 import fr.neamar.kiss.dataprovider.ContactProvider;
@@ -52,6 +56,10 @@ public class DataHandler extends BroadcastReceiver {
         providers.add(appProvider);
 
         if (prefs.getBoolean("enable-contacts", true)) {
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context.checkSelfPermission((Activity) context, android.Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_DENIED)
+                
+            }
+
             contactProvider = new ContactProvider(context);
             providers.add(contactProvider);
         } else {
