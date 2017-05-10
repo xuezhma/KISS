@@ -17,11 +17,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.v4.view.GestureDetectorCompat;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -35,6 +37,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupMenu;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
@@ -59,7 +62,11 @@ import fr.neamar.kiss.ui.BottomPullEffectView;
 import fr.neamar.kiss.ui.KeyboardScrollHider;
 import fr.neamar.kiss.utils.PackageManagerUtils;
 
-public class MainActivity extends Activity implements QueryInterface, KeyboardScrollHider.KeyboardHandler {
+public class MainActivity extends Activity implements
+        QueryInterface,
+        KeyboardScrollHider.KeyboardHandler,
+        GestureDetector.OnGestureListener,
+        GestureDetector.OnDoubleTapListener{
 
     public static final String START_LOAD = "fr.neamar.summon.START_LOAD";
     public static final String LOAD_OVER = "fr.neamar.summon.LOAD_OVER";
@@ -107,6 +114,11 @@ public class MainActivity extends Activity implements QueryInterface, KeyboardSc
      */
     private SharedPreferences prefs;
     private BroadcastReceiver mReceiver;
+    private GestureDetectorCompat mDetector;
+    /**
+     * View for the Search layout
+     */
+    private RelativeLayout searchEditLayout;
     /**
      * View for the Search text
      */
@@ -256,6 +268,9 @@ public class MainActivity extends Activity implements QueryInterface, KeyboardSc
 
         registerLongClickOnFavorites();
         searchEditText = (EditText) findViewById(R.id.searchEditText);
+        searchEditLayout = (RelativeLayout) findViewById(R.id.searchEditLayout);
+        mDetector = new GestureDetectorCompat(this,this);
+        mDetector.setOnDoubleTapListener(this);
 
         // Listen to changes
         searchEditText.addTextChangedListener(new TextWatcher() {
@@ -773,7 +788,7 @@ public class MainActivity extends Activity implements QueryInterface, KeyboardSc
                 searchEditText.setHint("");
                 searcher = new NullSearcher(this);
                 //Hide default scrollview
-                findViewById(R.id.main_empty).setVisibility(View.INVISIBLE);
+                findViewById(R.id.main_empty).setVisibility(View.GONE);
 
             } else {
                 list.setVerticalScrollBarEnabled(true);
@@ -834,5 +849,62 @@ public class MainActivity extends Activity implements QueryInterface, KeyboardSc
 
     public int getFavIconsSize() {
         return favsIds.length;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent motionEvent){
+        this.mDetector.onTouchEvent(motionEvent);
+        return super.onTouchEvent(motionEvent);
+    }
+
+    @Override
+    public boolean onSingleTapConfirmed(MotionEvent motionEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onDoubleTap(MotionEvent motionEvent) {
+        if(searchEditLayout.getVisibility()==View.INVISIBLE) {
+            searchEditLayout.setVisibility(View.VISIBLE);
+        }
+        else if(searchEditLayout.getVisibility()==View.VISIBLE) {
+            searchEditLayout.setVisibility(View.INVISIBLE);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onDoubleTapEvent(MotionEvent motionEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onDown(MotionEvent motionEvent) {
+        return false;
+    }
+
+    @Override
+    public void onShowPress(MotionEvent motionEvent) {
+
+    }
+
+    @Override
+    public boolean onSingleTapUp(MotionEvent motionEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
+        return false;
+    }
+
+    @Override
+    public void onLongPress(MotionEvent motionEvent) {
+
+    }
+
+    @Override
+    public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
+        return false;
     }
 }
